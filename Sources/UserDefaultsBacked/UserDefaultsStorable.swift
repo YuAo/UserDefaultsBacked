@@ -141,7 +141,7 @@ extension UserDefaultsValueRepresentable where Self: Codable {
 // MARK: - UserDefaultsValueRepresentable + NSSecureCoding
 
 extension UserDefaultsValueRepresentable where Self: NSObject & NSSecureCoding {
-    public func toUserDefaultValue() throws -> Data {
+    public func toUserDefaultsValue() throws -> Data {
         if #available(macOS 10.13, iOS 11.0, tvOS 11.0, watchOS 4.0, *) {
             return try NSKeyedArchiver.archivedData(withRootObject: self, requiringSecureCoding: true)
         } else {
