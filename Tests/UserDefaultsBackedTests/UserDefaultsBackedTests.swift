@@ -3,11 +3,15 @@ import XCTest
 
 final class UserDefaultsBackedTests: XCTestCase {
     
+    @UserDefaultsBacked(key: "string", default: "default")
+    var stringProperty: String
+    
     func testExample() {
-        // This is an example of a functional test case.
-        // Use XCTAssert and related functions to verify your tests produce the correct
-        // results.
-        //XCTAssertEqual(UserDefaultsBacked().text, "Hello, World!")
+        
+        self._stringProperty.clear()
+        XCTAssertEqual(stringProperty, "default")
+        self.stringProperty = "hello"
+        XCTAssertEqual(stringProperty, "hello")
     }
 
     static var allTests = [

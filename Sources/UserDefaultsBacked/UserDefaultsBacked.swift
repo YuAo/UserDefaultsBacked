@@ -26,10 +26,10 @@ internal enum Error: Swift.Error {
         }
     }
     
-    public init(key: String, defaultValue: Value, userDefaults: UserDefaults = .standard) {
+    public init(key: String, `default`: Value, userDefaults: UserDefaults = .standard) {
         self.key = key
         self.defaults = userDefaults
-        self.defaultValue = defaultValue
+        self.defaultValue = `default`
         
         if let value = defaults.object(forKey: key) {
             do {
@@ -40,16 +40,16 @@ internal enum Error: Swift.Error {
                 }
             } catch {
                 assertionFailure(error.localizedDescription)
-                self.wrappedValue = defaultValue
+                self.wrappedValue = `default`
             }
         } else {
             //missing value
-            self.wrappedValue = defaultValue
+            self.wrappedValue = `default`
         }
     }
     
     public init<T>(key: String, userDefaults: UserDefaults = .standard) where Value == T? {
-        self.init(key: key, defaultValue: nil, userDefaults: userDefaults)
+        self.init(key: key, default: nil, userDefaults: userDefaults)
     }
     
     public mutating func clear() {

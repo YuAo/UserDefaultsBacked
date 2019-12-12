@@ -184,8 +184,7 @@ extension UserDefaultsValueRepresentable where Self: RawRepresentable, RawValue:
 
 extension URL: UserDefaultsValueRepresentable {}
 
-#if os(macOS)
-extension NSColor: UserDefaultsValueRepresentable {}
-#else
+#if canImport(UIKit)
+import UIKit
 extension UIColor: UserDefaultsValueRepresentable {}
 #endif
