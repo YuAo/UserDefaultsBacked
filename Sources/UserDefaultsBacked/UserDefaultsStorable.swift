@@ -128,13 +128,20 @@ extension UserDefaultsValueRepresentable {
 
 // MARK: - UserDefaultsValueRepresentable + Codable
 
+private struct CodableWrapper<T>: Codable where T: Codable {
+    let root: T
+    init(_ value: T) {
+        self.root = value
+    }
+}
+
 extension UserDefaultsValueRepresentable where Self: Codable {
     public init(userDefaultsValue: Data) throws {
-        self = try PropertyListDecoder().decode(Self.self, from: userDefaultsValue)
+        self = try PropertyListDecoder().decode(CodableWrapper<Self>.self, from: userDefaultsValue).root
     }
     
     public func toUserDefaultsValue() throws -> Data {
-        try PropertyListEncoder().encode(self)
+        try PropertyListEncoder().encode(CodableWrapper(self))
     }
 }
 
