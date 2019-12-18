@@ -6,6 +6,7 @@ Type-safe property wrapper for reading and writing UserDefaults.
 ## Usage
 
 ```Swift
+import UserDefaultsBacked
 
 struct CustomData: Codable {
     var identifier: String = ""
