@@ -17,9 +17,9 @@ public protocol UserDefaultsStorable {
 
 // MARK: - UserDefaultsValue
 
-public protocol UserDefaultsCompatible: UserDefaultsStorable {}
+public protocol UserDefaultsDirectlyStorable: UserDefaultsStorable {}
 
-extension UserDefaultsCompatible {
+extension UserDefaultsDirectlyStorable {
     private func typeCheck() throws {
         guard self is Bool ||
             self is Int ||
@@ -43,13 +43,13 @@ extension UserDefaultsCompatible {
     }
 }
 
-extension Bool: UserDefaultsCompatible {}
-extension Int: UserDefaultsCompatible {}
-extension Float: UserDefaultsCompatible {}
-extension Double: UserDefaultsCompatible {}
-extension Data: UserDefaultsCompatible {}
-extension String: UserDefaultsCompatible {}
-extension Date: UserDefaultsCompatible {}
+extension Bool: UserDefaultsDirectlyStorable {}
+extension Int: UserDefaultsDirectlyStorable {}
+extension Float: UserDefaultsDirectlyStorable {}
+extension Double: UserDefaultsDirectlyStorable {}
+extension Data: UserDefaultsDirectlyStorable {}
+extension String: UserDefaultsDirectlyStorable {}
+extension Date: UserDefaultsDirectlyStorable {}
 
 // MARK: - Containers
 
@@ -111,13 +111,13 @@ extension Optional: UserDefaultsStorable where Wrapped: UserDefaultsStorable {
 
 // MARK: - UserDefaultsValueRepresentable
 
-public protocol UserDefaultsValueRepresentable: UserDefaultsStorable {
-    associatedtype UserDefaultsValueType: UserDefaultsCompatible
+public protocol UserDefaultsCompatible: UserDefaultsStorable {
+    associatedtype UserDefaultsValueType: UserDefaultsDirectlyStorable
     init(userDefaultsValue: UserDefaultsValueType) throws
     func toUserDefaultsValue() throws -> UserDefaultsValueType
 }
 
-extension UserDefaultsValueRepresentable {
+extension UserDefaultsCompatible {
     public func toUserDefaultsDirectlyStorable() throws -> UserDefaultsValueType.UserDefaultsDirectlyStorableType {
         try self.toUserDefaultsValue().toUserDefaultsDirectlyStorable()
     }
@@ -135,7 +135,7 @@ private struct CodableWrapper<T>: Codable where T: Codable {
     }
 }
 
-extension UserDefaultsValueRepresentable where Self: Codable {
+extension UserDefaultsCompatible where Self: Codable {
     public init(userDefaultsValue: Data) throws {
         self = try PropertyListDecoder().decode(CodableWrapper<Self>.self, from: userDefaultsValue).root
     }
@@ -147,7 +147,7 @@ extension UserDefaultsValueRepresentable where Self: Codable {
 
 // MARK: - UserDefaultsValueRepresentable + NSSecureCoding
 
-extension UserDefaultsValueRepresentable where Self: NSObject & NSSecureCoding {
+extension UserDefaultsCompatible where Self: NSObject & NSSecureCoding {
     public func toUserDefaultsValue() throws -> Data {
         if #available(macOS 10.13, iOS 11.0, tvOS 11.0, watchOS 4.0, *) {
             return try NSKeyedArchiver.archivedData(withRootObject: self, requiringSecureCoding: true)
@@ -173,7 +173,7 @@ extension UserDefaultsValueRepresentable where Self: NSObject & NSSecureCoding {
 
 // MARK: - UserDefaultsValueRepresentable + RawRepresentable
 
-extension UserDefaultsValueRepresentable where Self: RawRepresentable, RawValue: UserDefaultsValueRepresentable, UserDefaultsValueType == RawValue.UserDefaultsValueType {
+extension UserDefaultsCompatible where Self: RawRepresentable, RawValue: UserDefaultsCompatible, UserDefaultsValueType == RawValue.UserDefaultsValueType {
     public init(userDefaultsValue: UserDefaultsValueType) throws {
         let raw = try RawValue.init(userDefaultsValue: userDefaultsValue)
         guard let value = Self.init(rawValue: raw) else {
@@ -189,9 +189,4 @@ extension UserDefaultsValueRepresentable where Self: RawRepresentable, RawValue:
 
 // MARK: - Extensions
 
-extension URL: UserDefaultsValueRepresentable {}
-
-#if canImport(UIKit)
-import UIKit
-extension UIColor: UserDefaultsValueRepresentable {}
-#endif
+extension URL: UserDefaultsCompatible {}
